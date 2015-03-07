@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<addons>
+<addon
+  id="plugin.video.nitro.streams"
+  version="2.0.2"
+  name="Nitro Streams"
+  provider-name="Team Nitroid">
+  <requires>
+   <import addon="xbmc.python" version="2.1.0"/>
+   <import addon="script.common.plugin.cache" version="0.9.1"/>
+  </requires>
+  <extension
+    point="xbmc.python.pluginsource"
+    library="default.py">
+   <provides>video</provides>
+  </extension>
+  <extension point="xbmc.addon.metadata">
+    <summary>Play a variety of quality streams on your Nitroid TV</summary>
+    <description>Please note that none of these streams are hosted by Nitroid TV or any affiliates of Nitroid TV.</description>
+    <platform>all</platform>
+  </extension>
+</addon>
+</addons>
