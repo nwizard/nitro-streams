@@ -9,7 +9,7 @@ import urlparse
 def findJS(data):
     idName = 'f*id'
     jsName = '(.*?\.js)'
-    regex = "(?:java)?script[^<]+" + idName + "\s*=\s*[\"']([^\"']+)[\"'][^<]*</script\s*>[^<]*<script[^<]*src=[\"']" + jsName + "[\"']"
+    regex = "(?:java)?scr(?:'\+')?ipt[^<]+" + idName + "\s*=\s*[\"']([^\"']+)[\"'][^<]*</scr(?:'\+')?ipt\s*>[^<]*<scr(?:'\+')?ipt[^<]*src=[\"']" + jsName + "[\"']"
     
     jscript = re.findall(data, regex)
     if jscript:
@@ -133,7 +133,7 @@ def findContentRefreshLink(data):
     if len(data.replace(' ','')) > maxLength:
         return None 
     
-    regex = '0;url=([^\'" ]+)'
+    regex = '0;\s*url=([^\'" ]+)'
     links = re.findall(data, regex)
     if links:
         return links[0]
@@ -147,14 +147,13 @@ def findContentRefreshLink(data):
 
 
 def findEmbedPHPLink(data):
-    regex = '<script type="text/javascript" src="([^"]+\.php\?[^"]+)"\s*>\s*</script>'
+    regex = '<script type="text/javascript" src="((?![^"]+localtimes)(?![^"]+adcash)[^"]+\.php\?[^"]+)"\s*>\s*</script>'
 
     links = re.findall(data, regex)
     if links:
         return links[0]
     
     return None
-
 
 def findVCods(data):
     regex = "function getURL03.*?sUrl.*?'([^']+)'.*?cod1.*?'([^']+)'.*?cod2.*?'([^']+)'.*?SWFObject\('([^']+)'"
@@ -174,12 +173,14 @@ def findVideoFrameLink(page, data):
     if not frames:
         return None
     
-    iframes = re.findall(data, "(frame[^>]* height=[\"']*(\d+)[\"']*[^>]*>)")
+    iframes = re.findall(data, "(frame(?![^>]*cbox\.ws)(?![^>]*capacanal)(?![^>]*programacion)[^>]* height=[\"']*([\%\d]+)[\"']*[^>]*>)")
 
     if iframes:
         for iframe in iframes:
-
-            height = int(iframe[1])
+            if iframe[1] == '100%':
+                height = minheight+1
+            else:
+                height = int(iframe[1])
             if height > minheight:
                 m = re.findall(iframe[0], "[\"' ]width=[\"']*(\d+[%]*)[\"']*")
                 if m:
@@ -192,6 +193,8 @@ def findVideoFrameLink(page, data):
                         if m:
                             link = m[0]
                             if not link.startswith('http://'):
+                                #if not page.endswith('/'):
+                                #    page += '/'
                                 up = urlparse.urlparse(urllib.unquote(page))
                                 if link.startswith('/'):
                                     link = urllib.basejoin(up[0] + '://' + up[1],link)
@@ -200,7 +203,7 @@ def findVideoFrameLink(page, data):
                             return link.strip()
 
     # Alternative 1
-    iframes = re.findall(data, "(frame[^>]*[\"; ]height:\s*(\d+)[^>]*>)")
+    iframes = re.findall(data, "(frame(?![^>]*cbox\.ws)(?![^>]*capacanal)(?![^>]*programacion)[^>]*[\"; ]height:\s*(\d+)[^>]*>)")
     if iframes:
         for iframe in iframes:
             height = int(iframe[1])

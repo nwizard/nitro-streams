@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <addon
   id="plugin.video.nitro.streams"
-  version="2.0.3"
+  version="2.0.4"
   name="Nitro Streams"
   provider-name="Team Nitroid">
   <requires>
