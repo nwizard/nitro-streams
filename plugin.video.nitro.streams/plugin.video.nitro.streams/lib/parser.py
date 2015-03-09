@@ -492,6 +492,10 @@ class Parser(object):
                               infos_values[i] = infos_values[i].replace('plugin.video.dragon.sports', 'plugin.video.nitro.sports')
                           if name == 'icon' and infos_values[i].find('http://dl.dropbox.com/s/da49g94i955w25r/icon.png') != -1:
                               infos_values[i] = infos_values[i].replace('http://dl.dropbox.com/s/da49g94i955w25r/icon.png', 'special://home/addons/plugin.video.nitro.sports/icon.png')
+
+                          #fix "box nation" typo!
+                          if name == 'title' and infos_values[i].find('on Nation') != -1:
+                              infos_values[i] = infos_values[i].replace('on Nation', 'ox Nation')
                               
                           tmp[name] = infos_values[i]
                           i = i+1
