@@ -2,7 +2,7 @@
 <addons>
 <addon
   id="plugin.video.nitro.streams"
-  version="2.0.13"
+  version="2.0.14"
   name="Nitro Streams"
   provider-name="Team Nitroid">
   <requires>
