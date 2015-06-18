@@ -27,6 +27,7 @@ from utils.fileUtils import findInSubdirectory, getFileContent, getFileExtension
 from utils.scrapingUtils import findVideoFrameLink, findContentRefreshLink, findRTMP, findJS, findPHP, getHostName, findEmbedPHPLink, findVCods
 from common import getHTML
 
+import unicodedata
 
 class ParsingResult(object):
     class Code:
@@ -456,13 +457,30 @@ class Parser(object):
 
 
     def __parseHtml(self, url, data, rules, skills, definedIn, lItem):          
-
+        
         #common.log('_parseHtml called')
         items = []
 
         parsing_calender = False
         if url.find('Calander.xml') != -1:
             parsing_calender = True
+
+        parsing_channel_list_1 = False
+        if url.find('Streams.xml') != -1:
+            parsing_channel_list_1 = True
+            channel_list = []
+            schedule_data = common.getHTML('http://dl.dropbox.com/s/qqktdllg2t6124h/P1Sch.xml?dl=1')
+            pattern = re.compile('\].*[AP]M (.*) on Stream(.*)\[')
+            matches = pattern.findall(schedule_data)
+            for match in matches:
+                ch_name = match[0].encode('utf-8').strip()
+                ch_num = match[1].encode('utf-8').strip()
+                if ch_num.find('&') == -1:
+                    channel_list.append({'name': ch_name, 'num': int(ch_num)})                
+                else:
+                    all_channels = re.findall('([0-9]+) ', ch_num)
+                    for ch in all_channels:
+                        channel_list.append({'name': ch_name, 'num': int(ch)})                
         
         for item_rule in rules:
             # common.log('rule: ' + item_rule.infos)
@@ -487,15 +505,30 @@ class Parser(object):
                           #skip if orange text is found in title field
                           if parsing_calender and name == 'title' and infos_values[i].find('COLOR=orange') != -1:
                               skip_item = True
+                              
                           #remove dragon sports icon from dropbox files    
                           if name == 'icon' and infos_values[i].find('plugin.video.dragon.sports') != -1:
-                              infos_values[i] = infos_values[i].replace('plugin.video.dragon.sports', 'plugin.video.nitro.sports')
+                              infos_values[i] = infos_values[i].replace('plugin.video.dragon.sports', 'plugin.video.nitro.streams')
+                          if infos_values[i].find('resources/images/DS/Stream') != -1:
+                              infos_values[i] = 'special://home/addons/plugin.video.nitro.streams/icon.png'
                           if infos_values[i].find('http://dl.dropbox.com/s/da49g94i955w25r/icon.png') != -1:
-                              infos_values[i] = infos_values[i].replace('http://dl.dropbox.com/s/da49g94i955w25r/icon.png', 'special://home/addons/plugin.video.nitro.sports/icon.png')
+                              infos_values[i] = infos_values[i].replace('http://dl.dropbox.com/s/da49g94i955w25r/icon.png', 'special://home/addons/plugin.video.nitro.streams/icon.png')
 
                           #fix "box nation" typo!
                           if name == 'title' and infos_values[i].find('on Nation') != -1:
                               infos_values[i] = infos_values[i].replace('on Nation', 'ox Nation')
+
+                          #handle channel list 1
+                          if parsing_channel_list_1 and name == 'title' and infos_values[i].find('tream') != -1:
+                              #now find the name of the program if it is available in the schedule
+                              pattern = re.compile('.*COLOR=blue\]tream (.*)\[')
+                              match = pattern.search(infos_values[i])
+                              channel_no = int(match.group(1))
+                              
+                              for idx in range(0, len(channel_list)):
+                                if channel_list[idx]['num'] == channel_no:
+                                    infos_values[i] = channel_list[idx]['name']
+                                    break
                               
                           tmp[name] = infos_values[i]
                           i = i+1
